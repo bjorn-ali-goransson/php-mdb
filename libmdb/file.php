@@ -254,12 +254,12 @@ function mdb_open($filename, $flags = 0)
     $mdb->f->writable = FALSE;
     /* that should be enought, but reopen the file read only just to be
      * sure we don't write invalid data */
-    close($mdb->f->fd);
-    $open_flags = O_RDONLY;
+    fclose($mdb->f->fd);
+    $open_flags = "r";
 // #ifdef _WIN32
-    $open_flags |= O_BINARY;
+    // $open_flags |= O_BINARY;
 // #endif
-    $mdb->f->fd = open($mdb->f->filename, $open_flags);
+    $mdb->f->fd = fopen($mdb->f->filename, $open_flags);
     if ($mdb->f->fd==-1) {
       die("Couldn't ropen file " . $mdb->f->filename . " in read only");
       mdb_close($mdb);
@@ -445,12 +445,21 @@ function _mdb_read_pg($mdb, &$pg_buf, $pg)
 //  memcpy(&l, buf + offset, 4);
 //  return (long)GINT32_FROM_BE(l);
 // }
-// long mdb_get_int32(void *buf, int offset)
-// {
-//  gint32 l;
-//  memcpy(&l, buf + offset, 4);
-//  return (long)GINT32_FROM_LE(l);
-// }
+function mdb_get_int32($arg1, $offset)
+{
+  if($arg1 instanceof MdbHandle){
+    $mdb = $arg1;
+    fseek($mdb->f->fd, $offset, SEEK_SET);
+    $buf = fread($mdb->f->fd, 4);
+    $a = unpack("NN", $buf);
+    return $a["N"];
+  }
+  if(is_string($arg1)){
+    $buf = $arg1;
+    $a = unpack("NN", substr($buf, $offset, 4));
+    return $a["N"];
+  }
+}
 // long mdb_pg_get_int32(MdbHandle *mdb, int offset)
 // {
 //  if (offset <0 || offset+4 > mdb->fmt->pg_size) return -1;

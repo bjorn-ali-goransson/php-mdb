@@ -179,7 +179,9 @@
 // };
 
 // #define IS_JET4(mdb) (mdb->f->jet_version==MDB_VER_JET4) /* obsolete */
-// #define IS_JET3(mdb) (mdb->f->jet_version==MDB_VER_JET3)
+function IS_JET3($mdb){
+  return $mdb->f->jet_version==MDB_VER_JET3;
+}
 
 // /* forward declarations */
 // typedef struct mdbindex MdbIndex;
